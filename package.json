@@ -1,25 +1,24 @@
 {
-  "name": "01-node-basics",
+  "name": "02-express",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "type": "module",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js",
-    "dev": "nodemon index.js"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/PavelRybalko/goit-node.git"
   },
-  "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/PavelRybalko/goit-node/issues"
   },
   "homepage": "https://github.com/PavelRybalko/goit-node#readme",
+  "private": true,
+  "scripts": {
+    "start": "cross-env NODE_ENV=production node ./bin/server.js",
+    "start:dev": "cross-env NODE_ENV=development nodemon ./bin/server.js",
+    "lint": "eslint **/*.{js,json}",
+    "lint:fix": "eslint --fix **/*.{js,json}",
+    "dev:debug": "node --inspect ./bin/server.js"
+  },
   "devDependencies": {
     "@babel/core": "^7.12.13",
     "@babel/eslint-parser": "^7.12.13",
@@ -27,14 +26,24 @@
     "@babel/plugin-proposal-private-methods": "^7.12.13",
     "@babel/plugin-syntax-top-level-await": "^7.12.13",
     "eslint": "^7.19.0",
+    "eslint-config-prettier": "7.2.0",
     "eslint-config-standard": "^16.0.2",
     "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-json": "2.1.2",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.2.1",
     "nodemon": "^2.0.7"
   },
   "dependencies": {
     "commander": "7.0.0",
-    "shortid": "^2.2.16"
+    "cors": "2.8.5",
+    "cross-env": "7.0.3",
+    "express": "4.17.1",
+    "joi": "17.4.0",
+    "lowdb": "1.0.0",
+    "morgan": "1.10.0",
+    "shortid": "^2.2.16",
+    "uuid": "8.3.2",
+    "uuidv4": "^6.2.6"
   }
 }
