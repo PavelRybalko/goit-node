@@ -1,48 +1,113 @@
+const fs = require('fs/promises')
+const path = require('path')
 const { uuid } = require('uuidv4')
-// const shortid = require("shortid");
-const db = require('./db')
+const shortid = require('shortid')
+const handleError = require('../helpers/handleerror')
+const duplicationCheck = require('../helpers/duplicationCheck')
+// const db = require("./db");
+// const contactsdb = require("./contacts.json");
+
+const contactsPath = path.join(__dirname, './contacts.json')
+
+// const asyncReadContacts = async () => {
+//   try {
+//     await fs.readFile(contactsPath)
+//     .then((data) => JSON.parse(data.toString()));
+//   } catch (err){
+//     handleError(err)
+//   }
+// }
+
+const asyncReadContacts = () =>
+  fs.readFile(contactsPath).then((data) => JSON.parse(data.toString()))
 
 const listContacts = async () => {
-  return db.get('contacts').value()
+  try {
+    const contacts = await asyncReadContacts()
+    return contacts
+    // return res.status(200).json({
+    //   status: 'success',
+    //   code: 200,
+    //   message: {
+    //     contacts,
+    //   },
+    // });
+  } catch (err) {
+    handleError(err)
+  }
 }
 
-const getById = async (contactId) => {
-  return db
-    .get('contacts')
-    .find({ id: Number(contactId) || contactId })
-    .value()
+const getContactById = async (contactId) => {
+  try {
+    const searchCondition = Number(contactId) || contactId
+    const contacts = await asyncReadContacts()
+    const result = contacts.find((contact) => contact.id === searchCondition)
+    return result
+  } catch (err) {
+    handleError(err)
+  }
 }
 
 const removeContact = async (contactId) => {
-  const [record] = db
-    .get('contacts')
-    .remove({ id: Number(contactId) || contactId })
-    .write()
-  return record
+  try {
+    const searchCondition = Number(contactId) || contactId
+    const contacts = await asyncReadContacts()
+
+    if (!contacts.find((contact) => contact.id === searchCondition)) {
+      return
+    }
+
+    const result = contacts.filter((contact) => contact.id !== searchCondition)
+    await fs.writeFile(contactsPath, JSON.stringify(result, null, 2))
+    return result
+  } catch (err) {
+    handleError(err)
+  }
 }
 
-const addContact = async (body) => {
-  const record = {
-    id: uuid(),
-    ...body,
+const addContact = async (contact) => {
+  try {
+    contact.id = shortid()
+    const contacts = await asyncReadContacts()
+
+    duplicationCheck(contacts, contact)
+    contacts.push(contact)
+    await fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2))
+    return contact
+  } catch (error) {
+    handleError(error)
   }
-  db.get('contacts').push(record).write()
-  return record
 }
 
 const updateContact = async (contactId, body) => {
-  const record = db
-    .get('contacts')
-    .find({ id: Number(contactId) || contactId })
-    .assign(body)
-    .value()
-  db.write()
-  return record.id ? record : null
+  try {
+    const contacts = await asyncReadContacts()
+
+    const contactIndex = contacts.findIndex(
+      (contact) => contact.id === Number(contactId)
+    )
+
+    if (!contactIndex) {
+      return
+    }
+
+    const updatedContact = {
+      ...contacts[contactIndex],
+      ...body,
+    }
+
+    contacts[contactIndex] = updatedContact
+    fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2))
+
+    return updatedContact
+  } catch (err) {
+    handleError(err)
+  }
 }
 
 module.exports = {
   listContacts,
-  getById,
+  getContactById,
   removeContact,
   addContact,
   updateContact,
