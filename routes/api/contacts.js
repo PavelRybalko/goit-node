@@ -1,5 +1,4 @@
 const express = require('express')
-const fs = require('fs').promises
 // const { query, validationResult } = require('express-validator');
 const router = express.Router()
 const {

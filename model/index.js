@@ -1,6 +1,5 @@
 const fs = require('fs/promises')
 const path = require('path')
-const { uuid } = require('uuidv4')
 const shortid = require('shortid')
 const handleError = require('../helpers/handleerror')
 const duplicationCheck = require('../helpers/duplicationCheck')
