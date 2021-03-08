@@ -4,12 +4,13 @@ const {
   removeContact,
   addContact,
   updateContact,
-} = require('../model/index')
+} = require('../model/contacts')
 
-const getAll = async (_req, res, next) => {
+const getAll = async (req, res, next) => {
   try {
-    const contacts = await listContacts()
-    return res.json({ status: 'success', code: 200, message: contacts })
+    const userId = req.user.id
+    const data = await listContacts(userId, req.query)
+    return res.json({ status: 'success', code: 200, data })
   } catch (e) {
     next(e)
   }
@@ -17,9 +18,10 @@ const getAll = async (_req, res, next) => {
 
 const getOneById = async (req, res, next) => {
   try {
-    const contact = await getById(req.params.id)
+    const userId = req.user.id
+    const contact = await getById(req.params.id, userId)
     if (contact) {
-      return res.json({ status: 'success', code: 200, message: { contact } })
+      return res.json({ status: 'success', code: 200, data: { contact } })
     } else {
       return res
         .status(404)
@@ -32,10 +34,11 @@ const getOneById = async (req, res, next) => {
 
 const create = async (req, res, next) => {
   try {
-    const contact = await addContact(req.body)
+    const userId = req.user.id
+    const contact = await addContact({ ...req.body, owner: userId })
     return res
       .status(201)
-      .json({ status: 'success', code: 201, message: { contact } })
+      .json({ status: 'success', code: 201, data: { contact } })
   } catch (e) {
     next(e)
   }
@@ -43,7 +46,8 @@ const create = async (req, res, next) => {
 
 const remove = async (req, res, next) => {
   try {
-    const contact = await removeContact(req.params.id)
+    const userId = req.user.id
+    const contact = await removeContact(req.params.id, userId)
     if (contact) {
       return res.json({
         status: 'success',
@@ -62,9 +66,10 @@ const remove = async (req, res, next) => {
 
 const update = async (req, res, next) => {
   try {
-    const contact = await updateContact(req.params.id, req.body)
+    const userId = req.user.id
+    const contact = await updateContact(req.params.id, req.body, userId)
     if (contact) {
-      return res.json({ status: 'success', code: 200, message: { contact } })
+      return res.json({ status: 'success', code: 200, data: { contact } })
     } else {
       return res
         .status(404)
