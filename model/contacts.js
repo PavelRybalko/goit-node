@@ -17,7 +17,7 @@ const listContacts = async (
       select: filter ? filter.split('|').join(' ') : '',
       populate: {
         path: 'owner',
-        // select: "email -_id",
+        // select: "email -_id", (Exclude '_id' field)
         select: 'email',
       },
     }
@@ -27,7 +27,7 @@ const listContacts = async (
 }
 
 const getById = async (id, userId) => {
-  const result = await Contact.findById({ id, owner: userId }).populate({
+  const result = await Contact.findOne({ _id: id, owner: userId }).populate({
     path: 'owner',
     select: 'email',
   })

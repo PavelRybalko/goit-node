@@ -1,4 +1,6 @@
 const Joi = require('joi')
+const { ErrorHandler } = require('../../../helpers/errorHandler')
+const { HttpCode } = require('../../../helpers/constants')
 // const { Subscription } = require('../../../helpers/constants')
 
 const schemaRegister = Joi.object({
@@ -50,4 +52,16 @@ module.exports.Login = (req, res, next) => {
 
 module.exports.UpdateUser = (req, res, next) => {
   return validate(schemaUpdateUser, req.body, next)
+}
+
+module.exports.UploadAvatar = (req, res, next) => {
+  if (!req.file) {
+    next(
+      new ErrorHandler(
+        HttpCode.BAD_REQUEST,
+        'Field AvatarURL with file is not found'
+      )
+    )
+  }
+  next()
 }

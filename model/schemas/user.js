@@ -2,6 +2,7 @@ const { Schema, model } = require('mongoose')
 const bcrypt = require('bcryptjs')
 const SALT_FACTOR = 6
 const { Subscription } = require('../../helpers/constants')
+const gravatar = require('gravatar')
 
 const userSchema = new Schema(
   {
@@ -13,6 +14,16 @@ const userSchema = new Schema(
         const re = /^\S+@\S+\.\S+/
         return re.test(String(value).toLowerCase())
       },
+    },
+    avatarURL: {
+      type: String,
+      default: function () {
+        return gravatar.url(this.email, { s: '250' }, true)
+      },
+    },
+    avatarIdCloud: {
+      type: String,
+      default: null,
     },
     password: {
       type: String,
