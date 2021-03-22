@@ -16,7 +16,7 @@ const getAll = async (req, res, next) => {
   }
 }
 
-const getOneById = async (req, res, next) => {
+const getContactById = async (req, res, next) => {
   try {
     const userId = req.user.id
     const contact = await getById(req.params.id, userId)
@@ -82,7 +82,7 @@ const update = async (req, res, next) => {
 
 module.exports = {
   getAll,
-  getOneById,
+  getContactById,
   create,
   update,
   remove,

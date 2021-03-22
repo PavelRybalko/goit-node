@@ -9,7 +9,7 @@ router
   .post('/', guard, validate.addContact, contactsController.create)
 
 router
-  .get('/:id', guard, contactsController.getOneById)
+  .get('/:id', guard, contactsController.getContactById)
   .delete('/:id', guard, contactsController.remove)
   .patch('/:id', guard, validate.updateContact, contactsController.update)
 
