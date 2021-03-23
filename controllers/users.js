@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken')
 const fs = require('fs').promises
 const { promisify } = require('util')
 const cloudinary = require('cloudinary').v2
+const { nanoid } = require('nanoid')
 // const path = require('path')
 // const Jimp = require('jimp')
 // const createFolderIsNotExist = require('../helpers/create-dir')
@@ -13,8 +14,13 @@ const {
   updateAvatar,
   updateUserSubscription,
   findByToken,
+  findByVerifyToken,
+  updateVerifyToken,
 } = require('../model/users')
+// const Users = require('../model/users')
 const { HttpCode } = require('../helpers/constants')
+const { ErrorHandler } = require('../helpers/errorHandler')
+const EmailService = require('../services/email')
 const SECRET_KEY = process.env.JWT_SECRET_KEY
 
 cloudinary.config({
@@ -37,14 +43,18 @@ const reg = async (req, res, next) => {
         message: 'Email in use',
       })
     }
-    const newUser = await create(req.body)
+    const verifyToken = nanoid()
+    const emailService = new EmailService(process.env.NODE_ENV)
+    await emailService.sendEmail(verifyToken, email)
+    const newUser = await create({ ...req.body, verify: false, verifyToken })
     return res.status(HttpCode.CREATED).json({
       status: 'success',
       code: HttpCode.CREATED,
       data: {
+        id: newUser.id,
         email: newUser.email,
         subscription: newUser.subscription,
-        avatar: newUser.avatar,
+        avatar: newUser.avatarURL,
       },
     })
   } catch (e) {
@@ -57,7 +67,7 @@ const login = async (req, res, next) => {
     const { email, password } = req.body
     const user = await findByEmail(email)
     const isPasswordValid = await user?.validPassword(password)
-    if (!user || !isPasswordValid) {
+    if (!user || !isPasswordValid || !user.verify) {
       return res.status(HttpCode.UNAUTHORIZED).json({
         status: 'error',
         code: HttpCode.UNAUTHORIZED,
@@ -158,6 +168,22 @@ const logout = async (req, res, next) => {
   }
 }
 
+const verify = async (req, res, next) => {
+  try {
+    const user = await findByVerifyToken(req.params.token)
+    if (user) {
+      await updateVerifyToken(user.id, true, null)
+      return res.json({
+        status: 'success',
+        code: HttpCode.OK,
+        message: 'Verification successful!',
+      })
+    }
+    next(new ErrorHandler(HttpCode.BAD_REQUEST, 'Link is not valid'))
+  } catch (e) {
+    next(e)
+  }
+}
 // const saveAvatarToStatic = async (req) => {
 //   const id = req.user.id
 //   const IMG_DIR = path.join(
@@ -206,4 +232,5 @@ module.exports = {
   logout,
   getCurrent,
   avatars,
+  verify,
 }

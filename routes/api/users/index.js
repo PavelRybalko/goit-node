@@ -28,5 +28,6 @@ router.get(
   // validation.UpdateUser,
   usersController.getCurrent
 )
+router.get('/users/verify/:token', usersController.verify)
 
 module.exports = router

@@ -7,7 +7,7 @@ const schemaRegister = Joi.object({
   email: Joi.string()
     .email({
       minDomainSegments: 2,
-      tlds: { allow: ['com', 'net'] },
+      tlds: { allow: ['com', 'net', 'ua', 'ru'] },
     })
     .required(),
   password: Joi.string().required(),
