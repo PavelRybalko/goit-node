@@ -11,7 +11,7 @@ const getById = jest.fn((id, userId) => {
   return contact
 })
 
-const addContact = jest.fn((body) => {
+const addContact = jest.fn((body, userId) => {
   const newContact = { ...body }
   contacts.push(newContact)
   return newContact

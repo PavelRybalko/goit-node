@@ -7,7 +7,7 @@ const contacts = [
     subscription: 'free',
     password: 'password',
     token: null,
-    owner: '604201f953b6652998dc8b92',
+    owner: '605edc3509d33a324494e122',
   },
   {
     _id: '5eb074232c30a1378dacdbdb',
@@ -17,7 +17,7 @@ const contacts = [
     subscription: 'free',
     password: 'password',
     token: null,
-    owner: '604201f953b6652998dc8b92',
+    owner: '605edc3509d33a324494e122',
   },
 ]
 
@@ -32,15 +32,16 @@ const newContact = {
 }
 
 const User = {
-  _id: '604201f953b6652998dc8b92',
+  _id: '605edc3509d33a324494e122',
   subscription: 'free',
   token:
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYwNDIwMWY5NTNiNjY1Mjk5OGRjOGI5MiIsImlhdCI6MTYxNTk5NjU4MiwiZXhwIjoxNjE2MDAzNzgyfQ.saVrMsSWtdtfYSb_ufuIZjcq4-1kxLMZUyJifTUolp4',
-  avatar:
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYwNWVkYzM1MDlkMzNhMzI0NDk0ZTEyMiIsImlhdCI6MTYxNjgzMDY4NSwiZXhwIjoxNjE2ODM3ODg1fQ.-i-SB1I9euUN3oZqRPo8Vu2ozu_caYHAR3MIObvEoeg',
+  avatarIdCloud: null,
+  avatarURL:
     'https://s.gravatar.com/avatar/d6ac26ce64657b23fce03f68f65dc6b4?s=250',
-  avatarURL: null,
-  email: 'example@example.com',
-  password: '$2a$06$XrUGjIrADdPjqlRH3aPzdOcfEOzvpHaG.Ia3h.TCMUTzN61ZJa7D2',
+  email: 'pustotaofficial@gmail.com',
+  password: '$2a$06$.446AxlQRo4.GqcrwHfkiO96ND/cGgl2ProeNDzZCvHwzkyzEw2ei',
+  verificationToken: null,
   createdAt: '2020-03-10T00:05:44.937Z',
   updatedAt: '2021-03-10T00:05:44.937Z',
 }

@@ -1,13 +1,10 @@
 const { users } = require('./data.js')
 const bcrypt = require('bcryptjs')
 
-const findByEmail = jest.fn((email) => {
-  const [user] = users.filter((el) => String(el.email) === String(email))
-  return user
-})
-
-const findById = jest.fn((id) => {
-  const [user] = users.filter((el) => String(el._id) === String(id))
+const findByField = jest.fn((field) => {
+  const key = Object.keys(field)[0]
+  const value = Object.values(field)[0]
+  const [user] = users.filter((el) => String(el[key]) === String(value))
   return user
 })
 
@@ -26,11 +23,7 @@ const create = jest.fn(({ email, password, subscription = 'free' }) => {
   return newUser
 })
 
-const findByToken = jest.fn((token) => {
-  return {}
-})
-
-const updateToken = jest.fn((id, token) => {
+const updateByField = jest.fn((id, token) => {
   return {}
 })
 
@@ -47,11 +40,9 @@ const updateUserSubscription = jest.fn((id, subscription) => {
 })
 
 module.exports = {
-  findByEmail,
-  findById,
-  findByToken,
+  findByField,
   create,
-  updateToken,
+  updateByField,
   updateAvatar,
   updateUserSubscription,
 }

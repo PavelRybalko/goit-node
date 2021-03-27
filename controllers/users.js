@@ -8,16 +8,12 @@ const { nanoid } = require('nanoid')
 // const createFolderIsNotExist = require('../helpers/create-dir')
 require('dotenv').config()
 const {
-  findByEmail,
   create,
-  updateToken,
   updateAvatar,
   updateUserSubscription,
-  findByToken,
-  findByVerifyToken,
-  updateVerifyToken,
+  findByField,
+  updateByField,
 } = require('../model/users')
-// const Users = require('../model/users')
 const { HttpCode } = require('../helpers/constants')
 const { ErrorHandler } = require('../helpers/errorHandler')
 const EmailService = require('../services/email')
@@ -25,8 +21,8 @@ const SECRET_KEY = process.env.JWT_SECRET_KEY
 
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
-  api_key: process.env.API_KEY,
-  api_secret: process.env.API_SECRET,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 })
 
 const uploadCloud = promisify(cloudinary.uploader.upload)
@@ -34,7 +30,7 @@ const uploadCloud = promisify(cloudinary.uploader.upload)
 const reg = async (req, res, next) => {
   try {
     const { email } = req.body
-    const user = await findByEmail(email)
+    const user = await findByField({ email })
     if (user) {
       return res.status(HttpCode.CONFLICT).json({
         status: 'error',
@@ -43,10 +39,13 @@ const reg = async (req, res, next) => {
         message: 'Email in use',
       })
     }
-    const verifyToken = nanoid()
+    const verificationToken = nanoid()
     const emailService = new EmailService(process.env.NODE_ENV)
-    await emailService.sendEmail(verifyToken, email)
-    const newUser = await create({ ...req.body, verify: false, verifyToken })
+    await emailService.sendEmail(verificationToken, email)
+    const newUser = await create({
+      ...req.body,
+      verificationToken,
+    })
     return res.status(HttpCode.CREATED).json({
       status: 'success',
       code: HttpCode.CREATED,
@@ -65,20 +64,22 @@ const reg = async (req, res, next) => {
 const login = async (req, res, next) => {
   try {
     const { email, password } = req.body
-    const user = await findByEmail(email)
+    const user = await findByField({ email })
     const isPasswordValid = await user?.validPassword(password)
-    if (!user || !isPasswordValid || !user.verify) {
+    if (!user || !isPasswordValid || user.verificationToken) {
       return res.status(HttpCode.UNAUTHORIZED).json({
         status: 'error',
         code: HttpCode.UNAUTHORIZED,
         data: 'UNAUTHORIZED',
-        message: 'Email or password is wrong',
+        message: user?.verificationToken
+          ? 'Please verify your email'
+          : 'Email or password is wrong',
       })
     }
     const id = user._id
     const payload = { id }
-    const token = jwt.sign(payload, SECRET_KEY, { expiresIn: '2h' })
-    await updateToken(id, token)
+    const token = jwt.sign(payload, SECRET_KEY, { expiresIn: '24h' })
+    await updateByField({ _id: id }, { token })
     return res.status(HttpCode.OK).json({
       status: 'success',
       code: HttpCode.OK,
@@ -100,6 +101,7 @@ const updateUser = async (req, res, next) => {
   try {
     const { subscription } = req.body
     const { id } = req.user
+    // const user = await updateByField({ _id: id }, { subscription })
     const user = await updateUserSubscription(id, subscription)
     return res.status(HttpCode.OK).json({
       status: 'success',
@@ -119,18 +121,27 @@ const updateUser = async (req, res, next) => {
 const getCurrent = async (req, res, next) => {
   try {
     const token = req.get('Authorization')?.split(' ')[1]
-    const user = await findByToken(token)
-    return res.status(HttpCode.OK).json({
-      status: 'success',
-      code: HttpCode.OK,
-      data: {
-        user: {
-          email: user.email,
-          subscription: user.subscription,
-          avatarURL: user.avatarURL,
+    const user = await findByField({ token })
+    // const userId = req.user.id
+    // const user = await findByField({ _id: userId })
+    if (user) {
+      return res.status(HttpCode.OK).json({
+        status: 'success',
+        code: HttpCode.OK,
+        data: {
+          user: {
+            email: user.email,
+            subscription: user.subscription,
+            avatarURL: user.avatarURL,
+          },
         },
-      },
-    })
+      })
+    } else {
+      return next({
+        status: HttpCode.UNAUTHORIZED,
+        message: 'Invalid credentials',
+      })
+    }
   } catch (e) {
     next(e)
   }
@@ -139,8 +150,8 @@ const getCurrent = async (req, res, next) => {
 const avatars = async (req, res, next) => {
   try {
     const id = req.user.id
-    // const avatarUrl = await saveAvatarToStatic(req)
-    // await updateAvatar(id, avatarUrl)
+    // const avatarURL = await saveAvatarToStatic(req)
+    // await updateByField((_id: id}, {avatarURL})
     const {
       public_id: avatarIdCloud,
       secure_url: avatarUrl,
@@ -160,8 +171,7 @@ const avatars = async (req, res, next) => {
 
 const logout = async (req, res, next) => {
   try {
-    const id = req.user.id
-    await updateToken(id, null)
+    await updateByField({ _id: req.user.id }, { token: null })
     return res.status(HttpCode.NO_CONTENT).json({})
   } catch (e) {
     next(e)
@@ -170,16 +180,22 @@ const logout = async (req, res, next) => {
 
 const verify = async (req, res, next) => {
   try {
-    const user = await findByVerifyToken(req.params.token)
+    const { verificationToken } = req.params
+    const user = await findByField({ verificationToken })
     if (user) {
-      await updateVerifyToken(user.id, true, null)
+      await updateByField({ _id: user.id }, { verificationToken: null })
       return res.json({
         status: 'success',
         code: HttpCode.OK,
         message: 'Verification successful!',
       })
     }
-    next(new ErrorHandler(HttpCode.BAD_REQUEST, 'Link is not valid'))
+    next(
+      new ErrorHandler(
+        HttpCode.BAD_REQUEST,
+        'Your verification token is not valid'
+      )
+    )
   } catch (e) {
     next(e)
   }

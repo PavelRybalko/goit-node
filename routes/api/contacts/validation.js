@@ -37,14 +37,14 @@ const schemaUpdateContact = Joi.object({
 const validate = (schema, obj, next) => {
   const { error } = schema.validate(obj)
   if (error) {
-    const [{ message }] = error.details
-    if (error.details[0].path[0] === 'phone') {
+    const { message, type, path } = error.details[0]
+    if (path[0] === 'phone') {
       return next({
         status: 400,
         message:
           "Field phone must be in one of the formats: '(XXX) XXX-XXX, XXX-XXX-XXXX, XXX XXX XXXX, XXX.XXX.XXXX, +XX (XXX) XXX-XXXX'",
       })
-    } else if (error.details[0].type === 'object.min') {
+    } else if (type === 'object.missing') {
       return next({
         status: 400,
         message: 'missing fields',

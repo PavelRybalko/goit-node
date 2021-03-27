@@ -23,7 +23,7 @@ class EmailService {
     }
   }
 
-  #createTemplate(verifyToken, name = 'Guest') {
+  #createTemplate(verificationToken, name = 'Guest') {
     const mailGenerator = new this.#GenerateTemplate({
       theme: 'cerberus',
       product: {
@@ -36,11 +36,11 @@ class EmailService {
         name,
         intro: 'Attention',
         action: {
-          instructions: 'To end verify click the button:',
+          instructions: 'To finish verification click the button:',
           button: {
             color: '#22BC66',
             text: 'Confirm your account',
-            link: `${this.link}/users/verify/${verifyToken}`,
+            link: `${this.link}/users/verify/${verificationToken}`,
           },
         },
         outro:
@@ -50,8 +50,8 @@ class EmailService {
     return mailGenerator.generate(template)
   }
 
-  async sendEmail(verifyToken, email) {
-    const emailBody = this.#createTemplate(verifyToken)
+  async sendEmail(verificationToken, email) {
+    const emailBody = this.#createTemplate(verificationToken)
     this.#sender.setApiKey(process.env.SENDGRID_API_KEY)
     const msg = {
       to: email,
