@@ -22,11 +22,7 @@ router.patch(
   validation.UploadAvatar,
   usersController.avatars
 )
-router.get(
-  '/users/current',
-  guard,
-  // validation.UpdateUser,
-  usersController.getCurrent
-)
+router.get('/users/current', guard, usersController.getCurrent)
+router.get('/users/verify/:verificationToken', usersController.verify)
 
 module.exports = router

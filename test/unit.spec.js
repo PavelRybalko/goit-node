@@ -13,12 +13,6 @@ describe('Unit test create-dir.js', () => {
     await createFolder('test-unit')
     expect(fs.access('test-unit')).toBeDefined()
   })
-
-  // it('run function false', async () => {
-  //   fs.access = jest.fn().mockImplementation(() => Promise.reject(false))
-  //   await createFolder('test-unit')
-  //   expect(fs.access('test-unit')).toBeDefined()
-  // })
 })
 
 describe('Unit test ErrorHandler.js', () => {

@@ -1,26 +1,28 @@
 const User = require('./schemas/user')
 
-const findByEmail = async (email) => {
-  const result = await User.findOne({ email })
-  return result
-}
-
-const findById = async (id) => {
-  const result = await User.findOne({ _id: id })
-  return result
-}
-
-const create = async ({ email, password, subscription }) => {
-  const user = new User({ email, password, subscription })
+const create = async ({
+  email,
+  password,
+  subscription,
+  verify,
+  verificationToken,
+}) => {
+  const user = new User({
+    email,
+    password,
+    subscription,
+    verify,
+    verificationToken,
+  })
   return await user.save()
 }
 
-const updateToken = async (id, token) => {
-  return await User.updateOne({ _id: id }, { token })
+const findByField = async (field) => {
+  return await User.findOne(field)
 }
 
-const findByToken = async (token) => {
-  return await User.findOne({ token })
+const updateByField = async (field, updateData) => {
+  return await User.findOneAndUpdate(field, updateData)
 }
 
 const updateAvatar = async (id, avatarURL, avatarIdCloud) => {
@@ -37,11 +39,9 @@ const updateUserSubscription = async (id, subscription) => {
 }
 
 module.exports = {
-  findByEmail,
-  findById,
-  findByToken,
+  findByField,
   create,
-  updateToken,
   updateAvatar,
+  updateByField,
   updateUserSubscription,
 }
